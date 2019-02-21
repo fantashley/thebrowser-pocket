@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
 from GmailFetcher import GmailFetcher
+from pathlib import Path
+import os.path
 import requests
 import sys
+import time
 
 BROWSER_EMAIL = "robert@thebrowser.com"
 
@@ -28,7 +31,13 @@ def build_payload(email_content, action, tags=None):
 
 fetcher = GmailFetcher()
 fetcher.connect()
-browser_messages = fetcher.query_messages('me', "from:({0})".format(BROWSER_EMAIL))
+
+if os.path.exists("load_complete"):
+    last_load_time = int(os.path.getmtime("load_complete"))
+    browser_messages = fetcher.query_messages('me', \
+            "from:({0}) after:{1}".format(BROWSER_EMAIL, last_load_time))
+else:
+    browser_messages = fetcher.query_messages('me', "from:({0})".format(BROWSER_EMAIL))
 
 email_payload = []
 
@@ -41,3 +50,5 @@ pocket_request_data['consumer_key'] = sys.argv[1]
 pocket_request_data['access_token'] = sys.argv[2]
 pocket_request_data['actions'] = email_payload
 add_request = requests.post("https://getpocket.com/v3/send", json=pocket_request_data)
+if add_request.status_code == requests.codes.ok:
+    Path("load_complete").touch()
