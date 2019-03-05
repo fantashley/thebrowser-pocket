@@ -1,7 +1,3 @@
 __pycache__/
 venv/
 .idea/
-token.pickle
-credentials.json
-keys
-load_complete
