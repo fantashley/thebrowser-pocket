@@ -19,7 +19,9 @@ def build_payload(email_content, action, tags=None):
     for link in articles:
         article_title = link.a.getText()
         redirect_url = link.a.get('href')
-        r = requests.get(redirect_url)
+        headers = requests.utils.default_headers()
+        headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
+        r = requests.get(redirect_url, headers=headers)
         article_url = r.url
         pocket_action = {"action": action}
         pocket_action["title"] = article_title
